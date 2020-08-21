@@ -150,10 +150,10 @@ func (s *mainScope) initDiskWriters(logger *log.Logger) {
 	}
 }
 
-func flagTickers(flag string) (tikers []ticker) {
+func flagTickers(flag string) (tickers []ticker) {
 	flagArr := strings.Split(flag, ",")
 	for _, str := range flagArr {
-		tikers = append(tikers, ticker(str))
+		tickers = append(tickers, ticker(str))
 	}
-	return tikers
+	return tickers
 }

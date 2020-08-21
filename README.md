@@ -1,5 +1,7 @@
-Orderbook Dumper for Tinkoff Invest OpenAPI
-===========================================
+Orderbooks Dumper
+=================
+
+Orderbooks dumper for [Tinkoff Invest OpenAPI](https://github.com/TinkoffCreditSystems/invest-openapi)
 
 Options
 -------
@@ -17,7 +19,7 @@ go run . --help                                                                 
 Example
 -------
 
-`go run . -token "$TINKOFF_SANDBOX" -tickers NVDA,MSFT,TSLA -depth 5`:
+`go run . -token "$TINKOFF_SANDBOX" -tickers NVDA,MSFT,TSLA -depth 5`
 
 ```
 2020/08/22 00:01:55 Subscribed MSFT BBG000BPH459
@@ -25,7 +27,7 @@ Example
 2020/08/22 00:01:55 Subscribed NVDA BBG000BBJQV0
 ```
 
-`tail -f NVDA`:
+`tail -f NVDA`
 
 ```json
 {"event":{"event":"orderbook","time":"2020-08-21T21:00:53.397580821Z","payload":{"figi":"BBG000BBJQV0","depth":5,"bids":[[507,6],[506.84,53],[506.8,100],[506.75,75],[506.74,10]],"asks":[[507.19,196],[507.2,52],[507.28,75],[507.29,301],[507.35,10]]}},"ticker":"NVDA","time":"2020-08-22T00:00:53.384211+03:00"}

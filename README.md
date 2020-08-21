@@ -1,7 +1,7 @@
 Orderbooks Dumper
 =================
 
-Orderbooks dumper for [Tinkoff Invest OpenAPI](https://github.com/TinkoffCreditSystems/invest-openapi)
+JSON dumper of [Tinkoff Invest OpenAPI](https://github.com/TinkoffCreditSystems/invest-openapi)'s orderbooks
 
 Options
 -------

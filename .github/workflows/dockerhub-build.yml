@@ -1,0 +1,108 @@
+name: Build and Push Image for Docker Hub
+on:
+  release:
+    types: [published]
+jobs:
+  buildx:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Variables
+        id: variables
+        run: |
+          echo ::set-output name=SOURCE_NAME::${GITHUB_REF#refs/*/}
+          echo ::set-output name=SOURCE_BRANCH::${GITHUB_REF#refs/heads/}
+          echo ::set-output name=SOURCE_TAG::${GITHUB_REF#refs/tags/}
+          echo ::set-output name=REPOSITORY_NAME::$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $2}')
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: crazy-max/ghaction-docker-buildx@v2
+        with:
+          buildx-version: latest
+          skip-cache: false
+          qemu-version: latest
+
+      - name: Available platforms
+        run: echo ${{ steps.buildx.outputs.platforms }}
+
+#      - name: Run Buildx
+#        run: |
+#          docker buildx build \
+#            --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6 \
+#            -t a00s/${{ steps.variables.outputs.REPOSITORY_NAME }}:${{ steps.variables.outputs.SOURCE_TAG }} \
+#            .
+
+#      - name: Login to DockerHub
+#        run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+#      - name: Build and push tag
+#        run: |
+#          docker buildx build \
+#            --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6 \
+#            -t a00s/${{ steps.variables.outputs.REPOSITORY_NAME }}:${{ steps.variables.outputs.SOURCE_TAG }} \
+#            . \
+#            --push
+
+#      - name: Build and push latest
+#        run: |
+#          docker buildx build \
+#            --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6 \
+#            -t a00s/${{ steps.variables.outputs.REPOSITORY_NAME }}:latest \
+#            . \
+#            --push
+
+      - name: Build and upload binaries to release
+        run: |
+          mkdir build
+          docker buildx build \
+            --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6 \
+            -t a00s/${{ steps.variables.outputs.REPOSITORY_NAME }}:latest \
+            -o type=local,dest=build \
+            .
+          tar -C ./build/linux_amd64/app -czf ${{ steps.variables.outputs.REPOSITORY_NAME }}-amd64.tar.gz ${{ steps.variables.outputs.REPOSITORY_NAME }}
+          tar -C ./build/linux_arm64/app -czf ${{ steps.variables.outputs.REPOSITORY_NAME }}-arm64.tar.gz ${{ steps.variables.outputs.REPOSITORY_NAME }}
+          tar -C ./build/linux_arm_v6/app -czf ${{ steps.variables.outputs.REPOSITORY_NAME }}-armv6.tar.gz ${{ steps.variables.outputs.REPOSITORY_NAME }}
+          tar -C ./build/linux_arm_v7/app -czf ${{ steps.variables.outputs.REPOSITORY_NAME }}-armv7.tar.gz ${{ steps.variables.outputs.REPOSITORY_NAME }}
+
+      - name: upload amd64
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ${{ steps.variables.outputs.REPOSITORY_NAME }}-amd64.tar.gz
+          asset_name: ${{ steps.variables.outputs.REPOSITORY_NAME }}-amd64.tar.gz
+          asset_content_type: application/gzip
+
+      - name: upload arm64
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ${{ steps.variables.outputs.REPOSITORY_NAME }}-arm64.tar.gz
+          asset_name: ${{ steps.variables.outputs.REPOSITORY_NAME }}-arm64.tar.gz
+          asset_content_type: application/gzip
+
+      - name: upload armv6
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ${{ steps.variables.outputs.REPOSITORY_NAME }}-armv6.tar.gz
+          asset_name: ${{ steps.variables.outputs.REPOSITORY_NAME }}-armv6.tar.gz
+          asset_content_type: application/gzip
+
+      - name: upload armv7
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ${{ steps.variables.outputs.REPOSITORY_NAME }}-armv7.tar.gz
+          asset_name: ${{ steps.variables.outputs.REPOSITORY_NAME }}-armv7.tar.gz
+          asset_content_type: application/gzip

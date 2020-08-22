@@ -1,4 +1,4 @@
-module main
+module tinkoff-invest-dumper
 
 go 1.14
 

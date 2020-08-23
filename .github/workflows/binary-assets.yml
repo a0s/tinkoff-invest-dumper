@@ -33,7 +33,7 @@ jobs:
           mkdir build
           docker buildx build \
             --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6 \
-            --build-arg VERSION=${{ steps.variables.outputs.FULL_VERSION }} \
+            --build-arg FULL_VERSION=${{ steps.variables.outputs.FULL_VERSION }} \
             -t a00s/${{ steps.variables.outputs.REPOSITORY_NAME }}:latest \
             -o type=local,dest=build \
             .

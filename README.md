@@ -26,6 +26,17 @@ tinkoff-invest-dumper --help                                                    
 Run as Docker image
 -------------------
 
+```shell script
+docker run --rm -it a00s/tinkoff-invest-dumper --help
+Usage of /app/tinkoff-invest-dumper:
+  -depth int
+    	depth of orderbook (default 1)
+  -tickers string
+    	list of tickers
+  -token string
+    	your sandbox's token
+```
+
 Example
 -------
 

@@ -1,5 +1,5 @@
-Orderbooks Dumper
-=================
+Streaming Data Saver
+====================
 ![Binary release](https://github.com/a0s/tinkoff-invest-dumper/workflows/Binary%20release/badge.svg)
 ![Docker image](https://github.com/a0s/tinkoff-invest-dumper/workflows/Docker%20image/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

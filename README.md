@@ -26,6 +26,8 @@ tinkoff-invest-dumper --help                                                    
         list of tickers
   -token string
         your sandbox's token
+  -version
+        show version info
 ```
 
 Run as Docker image
@@ -40,6 +42,8 @@ Usage of /app/tinkoff-invest-dumper:
     	list of tickers
   -token string
     	your sandbox's token
+  -version
+      show version info
 ```
 
 Example

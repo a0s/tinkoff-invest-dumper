@@ -1,4 +1,4 @@
-name: Build and Push Image for Docker Hub
+name: Binary release
 on:
   release:
     types: [published]
@@ -27,25 +27,6 @@ jobs:
 
       - name: Available platforms
         run: echo ${{ steps.buildx.outputs.platforms }}
-
-      - name: Login to DockerHub
-        run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-
-      - name: Build and push tag
-        run: |
-          docker buildx build \
-            --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6 \
-            -t a00s/${{ steps.variables.outputs.REPOSITORY_NAME }}:${{ steps.variables.outputs.SOURCE_TAG }} \
-            . \
-            --push
-
-      - name: Build and push latest
-        run: |
-          docker buildx build \
-            --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6 \
-            -t a00s/${{ steps.variables.outputs.REPOSITORY_NAME }}:latest \
-            . \
-            --push
 
       - name: Build and upload binaries to release
         run: |

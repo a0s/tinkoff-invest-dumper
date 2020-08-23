@@ -21,7 +21,7 @@ var (
 func main() {
 	flag.Parse()
 	if *version {
-		fmt.Printf("tinkoff-invest-dumper %s\n", VersionString)
+		fmt.Printf("%s\n", VersionString)
 		os.Exit(0)
 	}
 

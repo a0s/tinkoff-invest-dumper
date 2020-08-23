@@ -16,6 +16,7 @@ jobs:
           echo ::set-output name=SOURCE_BRANCH::${GITHUB_REF#refs/heads/}
           echo ::set-output name=SOURCE_TAG::${GITHUB_REF#refs/tags/}
           echo ::set-output name=REPOSITORY_NAME::$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $2}')
+          echo ::set-output name=FULL_VERSION::$(git describe --tags --dirty --always)
 
       - name: Set up Docker Buildx
         id: buildx
@@ -33,7 +34,7 @@ jobs:
           mkdir build
           docker buildx build \
             --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6 \
-            --build-arg VERSION=${{ steps.variables.outputs.SOURCE_TAG }} \
+            --build-arg VERSION=${{ steps.variables.outputs.FULL_VERSION }} \
             -t a00s/${{ steps.variables.outputs.REPOSITORY_NAME }}:latest \
             -o type=local,dest=build \
             .

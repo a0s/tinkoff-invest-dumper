@@ -6,7 +6,9 @@ JSON dumper of [Tinkoff Invest OpenAPI](https://github.com/TinkoffCreditSystems/
 Releases
 --------
 
-The latest binary with static linking for: [amd64](https://github.com/a0s/tinkoff-invest-dumper/releases/latest/download/tinkoff-invest-dumper-amd64.tar.gz), [arm64](https://github.com/a0s/tinkoff-invest-dumper/releases/latest/download/tinkoff-invest-dumper-arm64.tar.gz), [armv6](https://github.com/a0s/tinkoff-invest-dumper/releases/latest/download/tinkoff-invest-dumper-armv6.tar.gz), [armv7](https://github.com/a0s/tinkoff-invest-dumper/releases/latest/download/tinkoff-invest-dumper-armv7.tar.gz)
+* binary with static linking for: [amd64](https://github.com/a0s/tinkoff-invest-dumper/releases/latest/download/tinkoff-invest-dumper-amd64.tar.gz), [arm64](https://github.com/a0s/tinkoff-invest-dumper/releases/latest/download/tinkoff-invest-dumper-arm64.tar.gz), [armv6](https://github.com/a0s/tinkoff-invest-dumper/releases/latest/download/tinkoff-invest-dumper-armv6.tar.gz), [armv7](https://github.com/a0s/tinkoff-invest-dumper/releases/latest/download/tinkoff-invest-dumper-armv7.tar.gz)
+
+* docker image with amd64, arm64, armv6 and armv7 manifests: [a00s/tinkoff-invest-dumper](https://hub.docker.com/repository/docker/a00s/tinkoff-invest-dumper)
 
 Options
 -------

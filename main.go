@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	sdk "github.com/TinkoffCreditSystems/invest-openapi-go-sdk"
 	"log"
 	"math/rand"
@@ -10,15 +11,21 @@ import (
 )
 
 var (
-	token   = flag.String("token", "", "your sandbox's token")
-	tickers = flag.String("tickers", "", "list of tickers")
-	depth   = flag.Int("depth", 1, "depth of orderbook")
+	token         = flag.String("token", "", "your sandbox's token")
+	tickers       = flag.String("tickers", "", "list of tickers")
+	depth         = flag.Int("depth", 1, "depth of orderbook")
+	version       = flag.Bool("version", false, "show version info")
+	VersionString string
 )
 
 func main() {
-	rand.Seed(time.Now().UnixNano()) // for RequestID
 	flag.Parse()
+	if *version {
+		fmt.Printf("tinkoff-invest-dumper %s\n", VersionString)
+		os.Exit(0)
+	}
 
+	rand.Seed(time.Now().UnixNano()) // for RequestID
 	logger := log.New(os.Stdout, "", log.LstdFlags)
 
 	sandboxRestClient := sdk.NewSandboxRestClient(*token)

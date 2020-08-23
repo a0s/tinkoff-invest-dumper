@@ -3,11 +3,16 @@ Orderbooks Dumper
 
 JSON dumper of [Tinkoff Invest OpenAPI](https://github.com/TinkoffCreditSystems/invest-openapi)'s orderbooks
 
+Releases
+--------
+
+The latest binary with static linking for: [amd64](https://github.com/a0s/tinkoff-invest-dumper/releases/latest/download/tinkoff-invest-dumper-amd64.tar.gz), [arm64](https://github.com/a0s/tinkoff-invest-dumper/releases/latest/download/tinkoff-invest-dumper-arm64.tar.gz), [armv6](https://github.com/a0s/tinkoff-invest-dumper/releases/latest/download/tinkoff-invest-dumper-armv6.tar.gz), [armv7](https://github.com/a0s/tinkoff-invest-dumper/releases/latest/download/tinkoff-invest-dumper-armv7.tar.gz)
+
 Options
 -------
 
 ```shell script
-go run . --help                                                                                                                                             ruby-2.7.1
+tinkoff-invest-dumper --help                                                                                                                                             ruby-2.7.1
   -depth int
         depth of orderbook (default 1)
   -tickers string
@@ -19,7 +24,7 @@ go run . --help                                                                 
 Example
 -------
 
-`go run . -token "$TINKOFF_SANDBOX" -tickers NVDA,MSFT,TSLA -depth 5`
+`tinkoff-invest-dumper -token "$TINKOFF_SANDBOX" -tickers NVDA,MSFT,TSLA -depth 5`
 
 ```
 2020/08/22 00:01:55 Subscribed MSFT BBG000BPH459

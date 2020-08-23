@@ -10,8 +10,8 @@ Releases
 
 * docker image with amd64, arm64, armv6 and armv7 manifests: [a00s/tinkoff-invest-dumper](https://hub.docker.com/repository/docker/a00s/tinkoff-invest-dumper)
 
-Options
--------
+Run as binary
+-------------
 
 ```shell script
 tinkoff-invest-dumper --help                                                                                                                                             ruby-2.7.1
@@ -22,6 +22,9 @@ tinkoff-invest-dumper --help                                                    
   -token string
         your sandbox's token
 ```
+
+Run as Docker image
+-------------------
 
 Example
 -------

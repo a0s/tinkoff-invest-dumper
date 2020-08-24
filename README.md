@@ -19,23 +19,26 @@ Options
 -------
 
 ```shell script
-tinkoff-invest-dumper --help                                                                                                                                             ruby-2.7.1
-  -candle string
-        list of tickers to subscribe for candles
-  -candleInterval string
-        interval of candles: 1min,2min,3min,5min,10min,15min,30min,hour,2hour,4hour,day,week,month (default "1min")
-  -orderbook string
-        list of tickers to subscribe for orderbooks
-  -orderbook-depth int
-        depth of orderbook: from 1 to 20 (default 20)
-  -path string
-        path to storage dir (default ".")
-  -token string
-        your sandbox's token
-  -version
-        show version info
+tinkoff-invest-dumper --help                                                                                                                                           --candle string
+    	list of tickers to subscribe for candles
+  --candleInterval string
+    	interval of candles: 1min,2min,3min,5min,10min,15min,30min,hour,2hour,4hour,day,week,month (default "1min")
+  --orderbook string
+    	list of tickers to subscribe for orderbooks
+  --orderbook-depth int
+    	depth of orderbook: from 1 to 20 (default 20)
+  --path string
+    	path to storage dir (default ".")
+  --time-suffix-enabled
+    	add the time suffix to every filename on (re)start
+  --time-suffix-format string
+    	go format of the time suffix (see https://golang.org/src/time/format.go) (default "2006010215")
+  --token string
+    	your sandbox's token
+  --version
+    	show version info
 ```
-
+      
 Run as Docker image
 -------------------
 
@@ -47,6 +50,7 @@ docker run \
   a00s/tinkoff-invest-dumper \
     --token "$TOKEN" \
     --path /data \
+    --time-suffix-enabled \
     --candle NVDA,MSFT,TSLA \
     --orderbook NVDA,MSFT,TSLA
 ```
@@ -65,7 +69,7 @@ Example
 2020/08/24 12:49:15 Subscribed to candles TSLA BBG000N9MNX3
 ```
 
-`tail -f NVDA_orderbook`
+`tail -f NVDA-obk`
 
 ```json
 {"a":[[514.31,75],[514.71,6]],"b":[[514.3,6],[514.25,10]],"figi":"BBG000BBJQV0","lt":"2020-08-24T12:49:24.866749+03:00","t":"2020-08-24T09:49:24.850272182Z","ticker":"NVDA"}
@@ -73,7 +77,7 @@ Example
 {"a":[[514.31,75],[514.71,6]],"b":[[514.3,6],[514.25,10]],"figi":"BBG000BBJQV0","lt":"2020-08-24T12:49:25.480208+03:00","t":"2020-08-24T09:49:25.50689026Z","ticker":"NVDA"}
 ```
 
-`tail -f NVDA_candles`
+`tail -f NVDA-cdl`
 
 ```json
 {"c":514.48,"figi":"BBG000BBJQV0","h":514.71,"i":"1min","l":514.48,"lt":"2020-08-24T12:49:15.203217+03:00","o":514.5,"t":"2020-08-24T09:49:15.241791397Z","ticker":"NVDA","ts":"2020-08-24T09:49:00Z","v":11}

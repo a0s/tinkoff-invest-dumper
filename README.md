@@ -79,3 +79,11 @@ Example
 {"c":514.48,"figi":"BBG000BBJQV0","h":514.71,"i":"1min","l":514.48,"lt":"2020-08-24T12:49:15.203217+03:00","o":514.5,"t":"2020-08-24T09:49:15.241791397Z","ticker":"NVDA","ts":"2020-08-24T09:49:00Z","v":11}
 {"c":514.48,"figi":"BBG000BBJQV0","h":514.71,"i":"1min","l":514.48,"lt":"2020-08-24T12:49:19.747036+03:00","o":514.5,"t":"2020-08-24T09:49:19.786563182Z","ticker":"NVDA","ts":"2020-08-24T09:49:00Z","v":13}
 ```
+
+Links
+-----
+
+- https://www.tinkoff.ru/invest/
+- https://github.com/TinkoffCreditSystems/invest-openapi/
+- https://tinkoffcreditsystems.github.io/invest-openapi/
+- https://t.me/tinkoffinvestopenapi

@@ -21,7 +21,7 @@ Options
 ```shell script
 tinkoff-invest-dumper --help                                                                                                                                           --candle string
     	list of tickers to subscribe for candles
-  --candleInterval string
+  --candle-interval string
     	interval of candles: 1min,2min,3min,5min,10min,15min,30min,hour,2hour,4hour,day,week,month (default "1min")
   --orderbook string
     	list of tickers to subscribe for orderbooks

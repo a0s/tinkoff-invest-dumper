@@ -54,7 +54,7 @@ docker run \
 Example
 -------
 
-`tinkoff-invest-dumper -token "$TINKOFF_SANDBOX" -candle NVDA,MSFT,TSLA -orderbook NVDA,MSFT,TSLA -orderbook-depth 2`
+`tinkoff-invest-dumper --token "$TINKOFF_SANDBOX" --candle NVDA,MSFT,TSLA --orderbook NVDA,MSFT,TSLA --orderbook-depth 2`
 
 ```
 2020/08/24 12:49:15 Subscribed to orderbook NVDA BBG000BBJQV0

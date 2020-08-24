@@ -19,24 +19,25 @@ Options
 -------
 
 ```shell script
-tinkoff-invest-dumper --help                                                                                                                                           --candle string
-    	list of tickers to subscribe for candles
+tinkoff-invest-dumper --help
+  --candle string
+        list of tickers to subscribe for candles
   --candle-interval string
-    	interval of candles: 1min,2min,3min,5min,10min,15min,30min,hour,2hour,4hour,day,week,month (default "1min")
+        interval of candles: 1min,2min,3min,5min,10min,15min,30min,hour,2hour,4hour,day,week,month (default "1min")
   --orderbook string
-    	list of tickers to subscribe for orderbooks
+        list of tickers to subscribe for orderbooks
   --orderbook-depth int
-    	depth of orderbook: from 1 to 20 (default 20)
+        depth of orderbook: from 1 to 20 (default 20)
   --path string
-    	path to storage dir (default ".")
+        path to storage dir (default ".")
   --time-suffix-enabled
-    	add the time suffix to every filename on (re)start
+        add the time suffix to every filename on (re)start
   --time-suffix-format string
-    	go format of the time suffix (see https://golang.org/src/time/format.go) (default "2006010215")
+        go format of the time suffix (see https://golang.org/src/time/format.go) (default "2006010215")
   --token string
-    	your sandbox's token
+        your sandbox's token
   --version
-    	show version info
+        show version info
 ```
       
 Run as Docker image
@@ -58,7 +59,13 @@ docker run \
 Example
 -------
 
-`tinkoff-invest-dumper --token "$TINKOFF_SANDBOX" --candle NVDA,MSFT,TSLA --orderbook NVDA,MSFT,TSLA --orderbook-depth 2`
+```shell script
+tinkoff-invest-dumper \
+    --token "$TINKOFF_SANDBOX" \
+    --candle NVDA,MSFT,TSLA \
+    --orderbook NVDA,MSFT,TSLA \
+    --orderbook-depth 2
+```
 
 ```
 2020/08/24 12:49:15 Subscribed to orderbook NVDA BBG000BBJQV0

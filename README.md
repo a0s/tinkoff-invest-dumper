@@ -6,7 +6,7 @@ Streaming Data Saver
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
-Working with [Tinkoff Invest OpenAPI](https://github.com/TinkoffCreditSystems/invest-openapi). Allows to dump realtime streams of orderbooks and candles to JSON file.
+Working with [Tinkoff Invest OpenAPI](https://github.com/TinkoffCreditSystems/invest-openapi). Dumps realtime streams of orderbooks and candles to JSON file for ML purposes.
 
 Releases
 --------
@@ -39,6 +39,12 @@ tinkoff-invest-dumper --help
   --version
         show version info
 ```
+
+File rotation
+-------------
+
+You can split and rotate JSON-files using `--time-suffix-enabled`. For e.g, if you start `tinkoff-invest-dumper` as `systemd` service,  you may use `cron` to restart this service at a certain time during an inactive part of a trading day. During restarting, `tinkoff-invest-dumper` closes previous files and opens a new one with a new-day-prefix. The inactive period for Tinkoff Invest is `2:00-10:30 MSK`.
+
       
 Run as Docker image
 -------------------

@@ -13,6 +13,8 @@ import (
 	"time"
 )
 
+var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
 type ticker string // eg. MSFT
 type figi string   // eg. BBG000BPH459
 
@@ -98,7 +100,7 @@ func (s *mainScope) eventReceiver(streamingClient *sdk.StreamingClient) {
 		case sdk.CandleEvent:
 			f = figi(realEvent.Candle.FIGI)
 		default:
-			s.logger.Fatalln("unsupport event type", event)
+			s.logger.Fatalln("unsupported event type", event)
 		}
 		t = ticker(s.figiInstrument[f].Ticker)
 
@@ -122,7 +124,7 @@ func (s *mainScope) eventReceiver(streamingClient *sdk.StreamingClient) {
 	}
 }
 
-func (s *mainScope) subscribeOrderbooks(streamingClient *sdk.StreamingClient) {
+func (s *mainScope) subscribeOrderbook(streamingClient *sdk.StreamingClient) {
 	for _, ticker := range s.orderbookTickers {
 		instrument := s.tickerInstrument[ticker]
 		err := streamingClient.SubscribeOrderbook(instrument.FIGI, *orderbookDepth, requestID())
@@ -133,7 +135,7 @@ func (s *mainScope) subscribeOrderbooks(streamingClient *sdk.StreamingClient) {
 	}
 }
 
-func (s *mainScope) unsubscribeOrderbooks(streamingClient *sdk.StreamingClient) {
+func (s *mainScope) unsubscribeOrderbook(streamingClient *sdk.StreamingClient) {
 	for _, ticker := range s.orderbookTickers {
 		instrument := s.tickerInstrument[ticker]
 		err := streamingClient.UnsubscribeOrderbook(instrument.FIGI, *orderbookDepth, requestID())
@@ -243,28 +245,49 @@ func (s *mainScope) candleWriter(ch eventChannel, filePath string) {
 	}
 }
 
+func (s *mainScope) buildFileName(ticker ticker) (orderbookName, candleName string) {
+	var orderbook []string
+	var candle []string
+
+	orderbook = append(orderbook, string(ticker))
+	candle = append(candle, string(ticker))
+
+	if *timeSuffixEnabled {
+		startedAt := timeSuffixStartedAt.Format(*timeSuffixFormat)
+		orderbook = append(orderbook, startedAt)
+		candle = append(candle, startedAt)
+	}
+
+	orderbook = append(orderbook, "obk")
+	candle = append(candle, "cdl")
+
+	var err error
+	orderbookName, err = filepath.Abs(filepath.Join(*path, strings.Join(orderbook, "-")))
+	if err != nil {
+		s.logger.Fatalln(err)
+	}
+	candleName, err = filepath.Abs(filepath.Join(*path, strings.Join(candle, "-")))
+	if err != nil {
+		s.logger.Fatalln(err)
+	}
+	return
+}
+
 func (s *mainScope) initDiskWriters() {
 	for _, ticker := range s.allTickers() {
-
 		instrument := s.tickerInstrument[ticker]
 		figi := figi(instrument.FIGI)
 
+		orderbookFilePath, candleFilePath := s.buildFileName(ticker)
+
 		if _, ok := findTicker(s.orderbookTickers, ticker); ok {
-			filePath, err := filepath.Abs(filepath.Join(*path, fmt.Sprintf("%s%s", string(ticker), "_orderbook")))
-			if err != nil {
-				s.logger.Fatalln(err)
-			}
 			ch := s.orderbookFigiChannels[figi]
-			go s.orderbookWriter(ch, filePath)
+			go s.orderbookWriter(ch, orderbookFilePath)
 		}
 
 		if _, ok := findTicker(s.candleTickers, ticker); ok {
-			filePath, err := filepath.Abs(filepath.Join(*path, fmt.Sprintf("%s%s", string(ticker), "_candles")))
-			if err != nil {
-				s.logger.Fatalln(err)
-			}
 			ch := s.candlesFigiChannels[figi]
-			go s.candleWriter(ch, filePath)
+			go s.candleWriter(ch, candleFilePath)
 		}
 	}
 }
@@ -287,7 +310,7 @@ func (s *mainScope) allTickers() []ticker {
 	return keys
 }
 
-func listToTickers(flag string) []ticker {
+func parseTickersList(flag string) []ticker {
 	var tickers []ticker
 	flags := strings.Split(flag, ",")
 	for _, f := range flags {
@@ -297,8 +320,6 @@ func listToTickers(flag string) []ticker {
 	}
 	return tickers
 }
-
-var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 func requestID() string {
 	b := make([]rune, 12)

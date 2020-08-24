@@ -14,6 +14,10 @@ var (
 	token = flag.String("token", "", "your sandbox's token")
 	path  = flag.String("path", ".", "path to storage dir")
 
+	timeSuffixEnabled   = flag.Bool("time-suffix-enabled", false, "add the time suffix to every filename on (re)start")
+	timeSuffixFormat    = flag.String("time-suffix-format", "2006010215", "go format of the time suffix (see https://golang.org/src/time/format.go)")
+	timeSuffixStartedAt = time.Now()
+
 	orderbook      = flag.String("orderbook", "", "list of tickers to subscribe for orderbooks")
 	orderbookDepth = flag.Int("orderbook-depth", 20, "depth of orderbook: from 1 to 20")
 
@@ -41,16 +45,16 @@ func main() {
 	}
 	defer streamingClient.Close()
 
-	scope := NewMainScope(listToTickers(*orderbook), listToTickers(*candle), logger)
+	scope := NewMainScope(parseTickersList(*orderbook), parseTickersList(*candle), logger)
 	scope.initInstruments(sandboxRestClient)
 	scope.initChannels()
 	scope.initDiskWriters()
 
 	go scope.eventReceiver(streamingClient)
 
-	scope.subscribeOrderbooks(streamingClient)
+	scope.subscribeOrderbook(streamingClient)
 	scope.subscribeCandles(streamingClient)
-	defer scope.unsubscribeOrderbooks(streamingClient)
+	defer scope.unsubscribeOrderbook(streamingClient)
 	defer scope.unsubscribeCandles(streamingClient)
 
 	select {} // sleep(0), epta

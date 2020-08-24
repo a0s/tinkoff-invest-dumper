@@ -22,7 +22,7 @@ var (
 	orderbookDepth = flag.Int("orderbook-depth", 20, "depth of orderbook: from 1 to 20")
 
 	candle         = flag.String("candle", "", "list of tickers to subscribe for candles")
-	candleInterval = flag.String("candleInterval", "1min", "interval of candles: 1min,2min,3min,5min,10min,15min,30min,hour,2hour,4hour,day,week,month")
+	candleInterval = flag.String("candle-interval", "1min", "interval of candles: 1min,2min,3min,5min,10min,15min,30min,hour,2hour,4hour,day,week,month")
 
 	version       = flag.Bool("version", false, "show version info")
 	VersionString string

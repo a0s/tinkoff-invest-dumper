@@ -181,12 +181,13 @@ func (s *mainScope) orderbookWriter(ch eventChannel, filePath string) {
 	for wrappedEvent := range ch {
 		event := wrappedEvent.event.(sdk.OrderBookEvent)
 		row := map[string]interface{}{
-			"ticker":     wrappedEvent.ticker,
-			"figi":       figi(event.OrderBook.FIGI),
-			"time":       event.Time,
-			"local_time": wrappedEvent.time.Format(time.RFC3339Nano),
-			"bids":       event.OrderBook.Bids,
-			"asks":       event.OrderBook.Asks,
+			"ticker": wrappedEvent.ticker,
+			"figi":   figi(event.OrderBook.FIGI),
+
+			"t":  event.Time,
+			"lt": wrappedEvent.time.Format(time.RFC3339Nano),
+			"b":  event.OrderBook.Bids,
+			"a":  event.OrderBook.Asks,
 		}
 
 		jsonBytes, err := json.Marshal(row)
@@ -216,18 +217,18 @@ func (s *mainScope) candleWriter(ch eventChannel, filePath string) {
 	for wrappedEvent := range ch {
 		event := wrappedEvent.event.(sdk.CandleEvent)
 		row := map[string]interface{}{
-			"ticker":     wrappedEvent.ticker,
-			"figi":       figi(event.Candle.FIGI),
-			"time":       event.Time,
-			"local_time": wrappedEvent.time.Format(time.RFC3339Nano),
+			"ticker": wrappedEvent.ticker,
+			"figi":   figi(event.Candle.FIGI),
 
-			"o":     event.Candle.OpenPrice,
-			"c":     event.Candle.ClosePrice,
-			"h":     event.Candle.HighPrice,
-			"l":     event.Candle.LowPrice,
-			"v":     event.Candle.Volume,
-			"time2": event.Candle.TS,
-			"i":     event.Candle.Interval,
+			"t":  event.Time,
+			"lt": wrappedEvent.time.Format(time.RFC3339Nano),
+			"o":  event.Candle.OpenPrice,
+			"c":  event.Candle.ClosePrice,
+			"h":  event.Candle.HighPrice,
+			"l":  event.Candle.LowPrice,
+			"v":  event.Candle.Volume,
+			"ts": event.Candle.TS,
+			"i":  event.Candle.Interval,
 		}
 
 		jsonBytes, err := json.Marshal(row)
@@ -249,7 +250,7 @@ func (s *mainScope) initDiskWriters() {
 		figi := figi(instrument.FIGI)
 
 		if _, ok := findTicker(s.orderbookTickers, ticker); ok {
-			filePath, err := filepath.Abs(filepath.Join(*path, string(ticker), "_orderbook"))
+			filePath, err := filepath.Abs(filepath.Join(*path, fmt.Sprintf("%s%s", string(ticker), "_orderbook")))
 			if err != nil {
 				s.logger.Fatalln(err)
 			}
@@ -258,7 +259,7 @@ func (s *mainScope) initDiskWriters() {
 		}
 
 		if _, ok := findTicker(s.candleTickers, ticker); ok {
-			filePath, err := filepath.Abs(filepath.Join(*path, string(ticker), "_candles"))
+			filePath, err := filepath.Abs(filepath.Join(*path, fmt.Sprintf("%s%s", string(ticker), "_candles")))
 			if err != nil {
 				s.logger.Fatalln(err)
 			}
@@ -286,10 +287,13 @@ func (s *mainScope) allTickers() []ticker {
 	return keys
 }
 
-func listToTickers(flag string) (tickers []ticker) {
-	flagArr := strings.Split(flag, ",")
-	for _, str := range flagArr {
-		tickers = append(tickers, ticker(str))
+func listToTickers(flag string) []ticker {
+	var tickers []ticker
+	flags := strings.Split(flag, ",")
+	for _, f := range flags {
+		if f != "" {
+			tickers = append(tickers, ticker(f))
+		}
 	}
 	return tickers
 }

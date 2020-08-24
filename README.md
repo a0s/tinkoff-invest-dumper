@@ -43,7 +43,7 @@ tinkoff-invest-dumper --help
 File rotation
 -------------
 
-You can split and rotate JSON-files using `--time-suffix-enabled`. For e.g, if you start `tinkoff-invest-dumper` as `systemd` service,  you may use `cron` to restart this service at a certain time during an inactive part of a trading day. During restarting, `tinkoff-invest-dumper` closes previous files and opens a new one with a new-day-prefix. The inactive period for Tinkoff Invest is `2:00-10:30 MSK`.
+You can split and rotate JSON-files using `--time-suffix-enabled`. For e.g, if you start `tinkoff-invest-dumper` as `systemd` service,  you may use `cron` to restart this service at a certain time during an inactive part of a trading day. During restarting, `tinkoff-invest-dumper` closes previous files and opens a new one with a new-day time suffix. The inactive period for Tinkoff Invest is `2:00-10:30 MSK`.
 
       
 Run as Docker image

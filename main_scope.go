@@ -62,6 +62,9 @@ TICKERS:
 		if err != nil {
 			s.logger.Fatalln(err)
 		}
+		if len(foundInstruments) == 0 {
+			s.logger.Fatalln("instrument not found:", string(ticker))
+		}
 		for _, instrument := range foundInstruments {
 			if instrument.Ticker == string(ticker) {
 				s.tickerInstrument[ticker] = instrument

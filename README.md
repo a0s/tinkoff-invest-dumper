@@ -1,8 +1,8 @@
 Streaming Data Saver
 ====================
 [![GitHub release](https://img.shields.io/github/release/a0s/tinkoff-invest-dumper.svg)](https://github.com/a0s/tinkoff-invest-dumper/releases/latest)
-![Binary release](https://github.com/a0s/tinkoff-invest-dumper/workflows/Binary%20release/badge.svg)
-![Docker image](https://github.com/a0s/tinkoff-invest-dumper/workflows/Docker%20image/badge.svg)
+[![Binary release](https://github.com/a0s/tinkoff-invest-dumper/workflows/Binary%20release/badge.svg)](https://github.com/a0s/tinkoff-invest-dumper/releases/latest)
+[![Docker image](https://github.com/a0s/tinkoff-invest-dumper/workflows/Docker%20image/badge.svg)](https://hub.docker.com/repository/docker/a00s/tinkoff-invest-dumper)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 

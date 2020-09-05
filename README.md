@@ -11,7 +11,7 @@ Working with [Tinkoff Invest OpenAPI](https://github.com/TinkoffCreditSystems/in
 Releases
 --------
 
-* static linked binary for: [linux/amd64](https://github.com/a0s/tinkoff-invest-dumper/releases/latest/download/tinkoff-invest-dumper-amd64.tar.gz), [linux/arm64](https://github.com/a0s/tinkoff-invest-dumper/releases/latest/download/tinkoff-invest-dumper-arm64.tar.gz), [linux/armv6](https://github.com/a0s/tinkoff-invest-dumper/releases/latest/download/tinkoff-invest-dumper-armv6.tar.gz), [linux/armv7](https://github.com/a0s/tinkoff-invest-dumper/releases/latest/download/tinkoff-invest-dumper-armv7.tar.gz)
+* statically-linked binary for: [linux/amd64](https://github.com/a0s/tinkoff-invest-dumper/releases/latest/download/tinkoff-invest-dumper-amd64.tar.gz), [linux/arm64](https://github.com/a0s/tinkoff-invest-dumper/releases/latest/download/tinkoff-invest-dumper-arm64.tar.gz), [linux/armv6](https://github.com/a0s/tinkoff-invest-dumper/releases/latest/download/tinkoff-invest-dumper-armv6.tar.gz), [linux/armv7](https://github.com/a0s/tinkoff-invest-dumper/releases/latest/download/tinkoff-invest-dumper-armv7.tar.gz)
 
 * docker image with amd64, arm64, armv6 and armv7 manifests: [a00s/tinkoff-invest-dumper](https://hub.docker.com/repository/docker/a00s/tinkoff-invest-dumper)
 

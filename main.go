@@ -16,7 +16,7 @@ var (
 
 	timeSuffixEnabled   = flag.Bool("time-suffix-enabled", false, "add the time suffix to every filename on (re)start")
 	timeSuffixFormat    = flag.String("time-suffix-format", "2006010215", "go format of the time suffix (see https://golang.org/src/time/format.go)")
-	timeSuffixStartedAt = time.Now()
+	timeSuffixStartedAt = time.Now().UTC()
 
 	orderbook      = flag.String("orderbook", "", "list of tickers to subscribe for orderbooks")
 	orderbookDepth = flag.Int("orderbook-depth", 20, "depth of orderbook: from 1 to 20")

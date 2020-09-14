@@ -45,8 +45,10 @@ func main() {
 	}
 	defer streamingClient.Close()
 
-	scope := NewMainScope(parseTickersList(*orderbook), parseTickersList(*candle), logger)
-	scope.initInstruments(sandboxRestClient)
+	scope, err := NewMainScope(sandboxRestClient, parseTickersList(*orderbook), parseTickersList(*candle), logger)
+	if err != nil {
+		logger.Fatalln(err)
+	}
 	scope.initChannels()
 	scope.initDiskWriters()
 

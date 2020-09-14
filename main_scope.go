@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	sdk "github.com/TinkoffCreditSystems/invest-openapi-go-sdk"
@@ -11,76 +10,51 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+	dict "tinkoff-invest-dumper/dictionary"
 )
-
-var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
-type ticker string // eg. MSFT
-type figi string   // eg. BBG000BPH459
 
 type wrappedEvent struct {
 	time   time.Time
-	ticker ticker
+	ticker dict.Ticker
 	event  interface{}
 }
 type eventChannel chan *wrappedEvent
 
 type mainScope struct {
-	orderbookTickers []ticker
-	candleTickers    []ticker
+	orderbookTickers []dict.Ticker
+	candleTickers    []dict.Ticker
 
-	orderbookFigiChannels map[figi]eventChannel
-	candlesFigiChannels   map[figi]eventChannel
+	orderbookFigiChannels map[dict.Figi]eventChannel
+	candlesFigiChannels   map[dict.Figi]eventChannel
 
-	figiInstrument   map[figi]sdk.Instrument
-	tickerInstrument map[ticker]sdk.Instrument
-
+	dict   *dict.Dictionary
 	logger *log.Logger
 }
 
-func NewMainScope(orderbookTickers []ticker, candleTickers []ticker, logger *log.Logger) *mainScope {
-	return &mainScope{
+func NewMainScope(restClient *sdk.SandboxRestClient, orderbookTickers []dict.Ticker, candleTickers []dict.Ticker, logger *log.Logger) (*mainScope, error) {
+	dictionary, err := dict.NewDictionary(restClient, dict.MergeTickers(orderbookTickers, candleTickers))
+	if err != nil {
+		return nil, err
+	}
+
+	scope := &mainScope{
 		orderbookTickers: orderbookTickers,
 		candleTickers:    candleTickers,
 
-		orderbookFigiChannels: map[figi]eventChannel{},
-		candlesFigiChannels:   map[figi]eventChannel{},
+		orderbookFigiChannels: map[dict.Figi]eventChannel{},
+		candlesFigiChannels:   map[dict.Figi]eventChannel{},
 
-		figiInstrument:   map[figi]sdk.Instrument{},
-		tickerInstrument: map[ticker]sdk.Instrument{},
+		dict: dictionary,
 
 		logger: logger,
 	}
-}
 
-func (s *mainScope) initInstruments(restClient *sdk.SandboxRestClient) {
-TICKERS:
-	for _, ticker := range s.allTickers() {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-
-		foundInstruments, err := restClient.InstrumentByTicker(ctx, string(ticker))
-		if err != nil {
-			s.logger.Fatalln(err)
-		}
-		if len(foundInstruments) == 0 {
-			s.logger.Fatalln("instrument not found:", string(ticker))
-		}
-		for _, instrument := range foundInstruments {
-			if instrument.Ticker == string(ticker) {
-				s.tickerInstrument[ticker] = instrument
-				s.figiInstrument[figi(instrument.FIGI)] = instrument
-				continue TICKERS
-			}
-		}
-
-		cancel()
-	}
+	return scope, nil
 }
 
 func (s *mainScope) initChannels() {
-	for _, ticker := range s.allTickers() {
-		instrument := s.tickerInstrument[ticker]
-		figi := figi(instrument.FIGI)
+	for _, ticker := range dict.MergeTickers(s.orderbookTickers, s.candleTickers) {
+		figi := s.dict.GetFIGIByTicker(ticker)
 
 		if _, ok := findTicker(s.orderbookTickers, ticker); ok {
 			s.orderbookFigiChannels[figi] = make(eventChannel)
@@ -94,18 +68,18 @@ func (s *mainScope) initChannels() {
 
 func (s *mainScope) eventReceiver(streamingClient *sdk.StreamingClient) {
 	err := streamingClient.RunReadLoop(func(event interface{}) error {
-		var t ticker
-		var f figi
+		var f dict.Figi
 
 		switch realEvent := event.(type) {
 		case sdk.OrderBookEvent:
-			f = figi(realEvent.OrderBook.FIGI)
+			f = dict.Figi(realEvent.OrderBook.FIGI)
 		case sdk.CandleEvent:
-			f = figi(realEvent.Candle.FIGI)
+			f = dict.Figi(realEvent.Candle.FIGI)
 		default:
 			s.logger.Fatalln("unsupported event type", event)
 		}
-		t = ticker(s.figiInstrument[f].Ticker)
+
+		t := s.dict.GetTickerByFIGI(f)
 
 		ce := wrappedEvent{
 			time:   time.Now(),
@@ -129,45 +103,45 @@ func (s *mainScope) eventReceiver(streamingClient *sdk.StreamingClient) {
 
 func (s *mainScope) subscribeOrderbook(streamingClient *sdk.StreamingClient) {
 	for _, ticker := range s.orderbookTickers {
-		instrument := s.tickerInstrument[ticker]
-		err := streamingClient.SubscribeOrderbook(instrument.FIGI, *orderbookDepth, requestID())
+		figi := s.dict.GetFIGIByTicker(ticker)
+		err := streamingClient.SubscribeOrderbook(string(figi), *orderbookDepth, requestID())
 		if err != nil {
 			s.logger.Fatalln(err)
 		}
-		s.logger.Println("Subscribed to orderbook", instrument.Ticker, instrument.FIGI)
+		s.logger.Println("Subscribed to orderbook", ticker, figi)
 	}
 }
 
 func (s *mainScope) unsubscribeOrderbook(streamingClient *sdk.StreamingClient) {
 	for _, ticker := range s.orderbookTickers {
-		instrument := s.tickerInstrument[ticker]
-		err := streamingClient.UnsubscribeOrderbook(instrument.FIGI, *orderbookDepth, requestID())
+		figi := s.dict.GetFIGIByTicker(ticker)
+		err := streamingClient.UnsubscribeOrderbook(string(figi), *orderbookDepth, requestID())
 		if err != nil {
 			s.logger.Fatalln(err)
 		}
-		s.logger.Println("Unsubscribed from orderbook", instrument.Ticker, instrument.FIGI)
+		s.logger.Println("Unsubscribed from orderbook", ticker, figi)
 	}
 }
 
 func (s *mainScope) subscribeCandles(streamingClient *sdk.StreamingClient) {
 	for _, ticker := range s.candleTickers {
-		instrument := s.tickerInstrument[ticker]
-		err := streamingClient.SubscribeCandle(instrument.FIGI, sdk.CandleInterval(*candleInterval), requestID())
+		figi := s.dict.GetFIGIByTicker(ticker)
+		err := streamingClient.SubscribeCandle(string(figi), sdk.CandleInterval(*candleInterval), requestID())
 		if err != nil {
 			s.logger.Fatalln(err)
 		}
-		s.logger.Println("Subscribed to candles", instrument.Ticker, instrument.FIGI)
+		s.logger.Println("Subscribed to candles", ticker, figi)
 	}
 }
 
 func (s *mainScope) unsubscribeCandles(streamingClient *sdk.StreamingClient) {
 	for _, ticker := range s.candleTickers {
-		instrument := s.tickerInstrument[ticker]
-		err := streamingClient.UnsubscribeCandle(instrument.FIGI, sdk.CandleInterval(*candleInterval), requestID())
+		figi := s.dict.GetFIGIByTicker(ticker)
+		err := streamingClient.UnsubscribeCandle(string(figi), sdk.CandleInterval(*candleInterval), requestID())
 		if err != nil {
 			s.logger.Fatalln(err)
 		}
-		s.logger.Println("Unsubscribed from candles", instrument.Ticker, instrument.FIGI)
+		s.logger.Println("Unsubscribed from candles", ticker, figi)
 	}
 }
 
@@ -187,7 +161,7 @@ func (s *mainScope) orderbookWriter(ch eventChannel, filePath string) {
 		event := wrappedEvent.event.(sdk.OrderBookEvent)
 		row := map[string]interface{}{
 			"ticker": wrappedEvent.ticker,
-			"figi":   figi(event.OrderBook.FIGI),
+			"figi":   dict.Figi(event.OrderBook.FIGI),
 
 			"t":  event.Time,
 			"lt": wrappedEvent.time.Format(time.RFC3339Nano),
@@ -223,7 +197,7 @@ func (s *mainScope) candleWriter(ch eventChannel, filePath string) {
 		event := wrappedEvent.event.(sdk.CandleEvent)
 		row := map[string]interface{}{
 			"ticker": wrappedEvent.ticker,
-			"figi":   figi(event.Candle.FIGI),
+			"figi":   dict.Figi(event.Candle.FIGI),
 
 			"t":  event.Time,
 			"lt": wrappedEvent.time.Format(time.RFC3339Nano),
@@ -248,7 +222,7 @@ func (s *mainScope) candleWriter(ch eventChannel, filePath string) {
 	}
 }
 
-func (s *mainScope) buildFileName(ticker ticker) (orderbookName, candleName string) {
+func (s *mainScope) buildFileName(ticker dict.Ticker) (orderbookName, candleName string) {
 	var orderbook []string
 	var candle []string
 
@@ -277,9 +251,8 @@ func (s *mainScope) buildFileName(ticker ticker) (orderbookName, candleName stri
 }
 
 func (s *mainScope) initDiskWriters() {
-	for _, ticker := range s.allTickers() {
-		instrument := s.tickerInstrument[ticker]
-		figi := figi(instrument.FIGI)
+	for _, ticker := range dict.MergeTickers(s.orderbookTickers, s.orderbookTickers) {
+		figi := s.dict.GetFIGIByTicker((ticker))
 
 		orderbookFilePath, candleFilePath := s.buildFileName(ticker)
 
@@ -295,36 +268,20 @@ func (s *mainScope) initDiskWriters() {
 	}
 }
 
-func (s *mainScope) allTickers() []ticker {
-	tickers := append(s.orderbookTickers, s.candleTickers...)
-
-	table := map[ticker]bool{}
-	for _, ticker := range tickers {
-		table[ticker] = true
-	}
-
-	keys := make([]ticker, len(table))
-	i := 0
-	for k := range table {
-		keys[i] = k
-		i++
-	}
-
-	return keys
-}
-
-func parseTickersList(flag string) []ticker {
-	var tickers []ticker
+func parseTickersList(flag string) []dict.Ticker {
+	var tickers []dict.Ticker
 	flags := strings.Split(flag, ",")
 	for _, f := range flags {
 		if f != "" {
-			tickers = append(tickers, ticker(f))
+			tickers = append(tickers, dict.Ticker(f))
 		}
 	}
 	return tickers
 }
 
 func requestID() string {
+	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
 	b := make([]rune, 12)
 	for i := range b {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
@@ -333,7 +290,7 @@ func requestID() string {
 	return string(b)
 }
 
-func findTicker(slice []ticker, val ticker) (int, bool) {
+func findTicker(slice []dict.Ticker, val dict.Ticker) (int, bool) {
 	for i, item := range slice {
 		if item == val {
 			return i, true

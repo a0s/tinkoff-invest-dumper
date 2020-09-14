@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	sdk "github.com/TinkoffCreditSystems/invest-openapi-go-sdk"
+	"sort"
+	"strings"
 	"time"
 )
 
@@ -57,6 +59,12 @@ func (d *Dictionary) GetTickerByFIGI(f Figi) Ticker {
 	return Ticker(d.figiInstrument[f].Ticker)
 }
 
+type sortTicker []Ticker
+
+func (a sortTicker) Len() int           { return len(a) }
+func (a sortTicker) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a sortTicker) Less(i, j int) bool { return strings.Compare(string(a[i]), string(a[j])) == -1 }
+
 func MergeTickers(s1, s2 []Ticker) []Ticker {
 	tickers := append(s1, s2...)
 
@@ -65,12 +73,11 @@ func MergeTickers(s1, s2 []Ticker) []Ticker {
 		table[ticker] = true
 	}
 
-	keys := make([]Ticker, len(table))
-	i := 0
-	for k := range table {
-		keys[i] = k
-		i++
+	var keys []Ticker
+	for k, _ := range table {
+		keys = append(keys, k)
 	}
 
+	sort.Sort(sortTicker(keys))
 	return keys
 }

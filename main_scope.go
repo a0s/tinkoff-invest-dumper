@@ -44,8 +44,7 @@ func NewMainScope(restClient *sdk.SandboxRestClient, orderbookTickers []dict.Tic
 		orderbookFigiChannels: map[dict.Figi]eventChannel{},
 		candlesFigiChannels:   map[dict.Figi]eventChannel{},
 
-		dict: dictionary,
-
+		dict:   dictionary,
 		logger: logger,
 	}
 
@@ -251,8 +250,8 @@ func (s *mainScope) buildFileName(ticker dict.Ticker) (orderbookName, candleName
 }
 
 func (s *mainScope) initDiskWriters() {
-	for _, ticker := range dict.MergeTickers(s.orderbookTickers, s.orderbookTickers) {
-		figi := s.dict.GetFIGIByTicker((ticker))
+	for _, ticker := range dict.MergeTickers(s.orderbookTickers, s.candleTickers) {
+		figi := s.dict.GetFIGIByTicker(ticker)
 
 		orderbookFilePath, candleFilePath := s.buildFileName(ticker)
 

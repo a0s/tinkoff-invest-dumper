@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+	"tinkoff-invest-dumper/config"
 	dict "tinkoff-invest-dumper/dictionary"
 )
 
@@ -103,7 +104,7 @@ func (s *mainScope) eventReceiver(streamingClient *sdk.StreamingClient) {
 func (s *mainScope) subscribeOrderbook(streamingClient *sdk.StreamingClient) {
 	for _, ticker := range s.orderbookTickers {
 		figi := s.dict.GetFIGIByTicker(ticker)
-		err := streamingClient.SubscribeOrderbook(string(figi), *orderbookDepth, requestID())
+		err := streamingClient.SubscribeOrderbook(string(figi), *config.OrderbookDepth, requestID())
 		if err != nil {
 			s.logger.Fatalln(err)
 		}
@@ -114,7 +115,7 @@ func (s *mainScope) subscribeOrderbook(streamingClient *sdk.StreamingClient) {
 func (s *mainScope) unsubscribeOrderbook(streamingClient *sdk.StreamingClient) {
 	for _, ticker := range s.orderbookTickers {
 		figi := s.dict.GetFIGIByTicker(ticker)
-		err := streamingClient.UnsubscribeOrderbook(string(figi), *orderbookDepth, requestID())
+		err := streamingClient.UnsubscribeOrderbook(string(figi), *config.OrderbookDepth, requestID())
 		if err != nil {
 			s.logger.Fatalln(err)
 		}
@@ -125,7 +126,7 @@ func (s *mainScope) unsubscribeOrderbook(streamingClient *sdk.StreamingClient) {
 func (s *mainScope) subscribeCandles(streamingClient *sdk.StreamingClient) {
 	for _, ticker := range s.candleTickers {
 		figi := s.dict.GetFIGIByTicker(ticker)
-		err := streamingClient.SubscribeCandle(string(figi), sdk.CandleInterval(*candleInterval), requestID())
+		err := streamingClient.SubscribeCandle(string(figi), sdk.CandleInterval(*config.CandleInterval), requestID())
 		if err != nil {
 			s.logger.Fatalln(err)
 		}
@@ -136,7 +137,7 @@ func (s *mainScope) subscribeCandles(streamingClient *sdk.StreamingClient) {
 func (s *mainScope) unsubscribeCandles(streamingClient *sdk.StreamingClient) {
 	for _, ticker := range s.candleTickers {
 		figi := s.dict.GetFIGIByTicker(ticker)
-		err := streamingClient.UnsubscribeCandle(string(figi), sdk.CandleInterval(*candleInterval), requestID())
+		err := streamingClient.UnsubscribeCandle(string(figi), sdk.CandleInterval(*config.CandleInterval), requestID())
 		if err != nil {
 			s.logger.Fatalln(err)
 		}
@@ -228,8 +229,8 @@ func (s *mainScope) buildFileName(ticker dict.Ticker) (orderbookName, candleName
 	orderbook = append(orderbook, string(ticker))
 	candle = append(candle, string(ticker))
 
-	if *timeSuffixEnabled {
-		startedAt := timeSuffixStartedAt.Format(*timeSuffixFormat)
+	if *config.TimeSuffixEnabled {
+		startedAt := config.TimeSuffixStartedAt.Format(*config.TimeSuffixFormat)
 		orderbook = append(orderbook, startedAt)
 		candle = append(candle, startedAt)
 	}
@@ -238,11 +239,11 @@ func (s *mainScope) buildFileName(ticker dict.Ticker) (orderbookName, candleName
 	candle = append(candle, "cdl")
 
 	var err error
-	orderbookName, err = filepath.Abs(filepath.Join(*path, strings.Join(orderbook, "-")))
+	orderbookName, err = filepath.Abs(filepath.Join(*config.Path, strings.Join(orderbook, "-")))
 	if err != nil {
 		s.logger.Fatalln(err)
 	}
-	candleName, err = filepath.Abs(filepath.Join(*path, strings.Join(candle, "-")))
+	candleName, err = filepath.Abs(filepath.Join(*config.Path, strings.Join(candle, "-")))
 	if err != nil {
 		s.logger.Fatalln(err)
 	}

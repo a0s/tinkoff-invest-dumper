@@ -5,7 +5,7 @@ COPY . /app
 RUN \
   apk --update add ca-certificates && \
   CGO_ENABLED=0 go build \
-    -ldflags="-w -s -X main.VersionString=$FULL_VERSION" \
+    -ldflags="-w -s -X config.VersionString=$FULL_VERSION" \
     -o "/app/tinkoff-invest-dumper"
 
 FROM scratch

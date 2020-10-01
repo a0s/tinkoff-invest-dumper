@@ -10,14 +10,19 @@ import (
 func main() {
 	logger := log.New(os.Stdout, "", log.LstdFlags)
 
-	sandboxRestClient := sdk.NewSandboxRestClient(*config.Token)
-	streamingClient, err := sdk.NewStreamingClient(logger, *config.Token)
+	sandboxRestClient := sdk.NewSandboxRestClient(config.Conf.Token)
+	streamingClient, err := sdk.NewStreamingClient(logger, config.Conf.Token)
 	if err != nil {
-		logger.Fatalln(err)
+		logger.Fatalln("create streaming client:", err)
 	}
-	defer streamingClient.Close()
+	defer func() {
+		err := streamingClient.Close()
+		if err != nil {
+			logger.Fatalln("close streaming client:", err)
+		}
+	}()
 
-	scope, err := NewMainScope(sandboxRestClient, parseTickersList(*config.Orderbook), parseTickersList(*config.Candle), logger)
+	scope, err := NewMainScope(sandboxRestClient, parseTickersList(config.Conf.Orderbook), parseTickersList(config.Conf.Candle), logger)
 	if err != nil {
 		logger.Fatalln(err)
 	}

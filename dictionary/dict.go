@@ -51,12 +51,22 @@ TICKERS:
 	return &Dictionary{figiInstrument: fs, tickerInstrument: ts}, nil
 }
 
-func (d *Dictionary) GetFIGIByTicker(t Ticker) Figi {
-	return Figi(d.tickerInstrument[t].FIGI)
+func (d *Dictionary) GetFIGIByTicker(t Ticker) (Figi, error) {
+	ins, ok := d.tickerInstrument[t]
+	if !ok {
+		return "", errors.New(fmt.Sprint("ticker not found:", t))
+	}
+
+	return Figi(ins.FIGI), nil
 }
 
-func (d *Dictionary) GetTickerByFIGI(f Figi) Ticker {
-	return Ticker(d.figiInstrument[f].Ticker)
+func (d *Dictionary) GetTickerByFIGI(f Figi) (Ticker, error) {
+	ins, ok := d.figiInstrument[f]
+	if !ok {
+		return "", errors.New(fmt.Sprint("figi not found:", f))
+	}
+
+	return Ticker(ins.Ticker), nil
 }
 
 type sortTicker []Ticker

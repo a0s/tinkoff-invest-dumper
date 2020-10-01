@@ -1,40 +1,69 @@
 package main
 
 import (
+	"fmt"
 	sdk "github.com/TinkoffCreditSystems/invest-openapi-go-sdk"
 	"log"
 	"os"
-	"tinkoff-invest-dumper/config"
+	conf "tinkoff-invest-dumper/config"
+	dict "tinkoff-invest-dumper/dictionary"
+	"tinkoff-invest-dumper/eventer"
+	"tinkoff-invest-dumper/writer"
 )
 
 func main() {
 	logger := log.New(os.Stdout, "", log.LstdFlags)
 
-	sandboxRestClient := sdk.NewSandboxRestClient(config.Conf.Token)
-	streamingClient, err := sdk.NewStreamingClient(logger, config.Conf.Token)
+	config := conf.NewConfig(logger)
+	if config.Version {
+		fmt.Printf("%s\n", conf.VersionString)
+		os.Exit(0)
+	}
+
+	sandboxRestClient := sdk.NewSandboxRestClient(config.Token)
+
+	streamingClient, err := sdk.NewStreamingClient(logger, config.Token)
 	if err != nil {
-		logger.Fatalln("create streaming client:", err)
+		logger.Fatalln("streaming client:", err)
 	}
 	defer func() {
 		err := streamingClient.Close()
 		if err != nil {
-			logger.Fatalln("close streaming client:", err)
+			logger.Fatalln("streaming client:", err)
 		}
 	}()
 
-	scope, err := NewMainScope(sandboxRestClient, parseTickersList(config.Conf.Orderbook), parseTickersList(config.Conf.Candle), logger)
+	dictionary, err := dict.NewDictionary(sandboxRestClient, dict.MergeTickers(config.GetOrderbookTickers(), config.GetCandleTickers()))
 	if err != nil {
-		logger.Fatalln(err)
+		logger.Fatalln("dictionary:", err)
 	}
-	scope.initChannels()
-	scope.initDiskWriters()
 
-	go scope.eventReceiver(streamingClient)
+	receiver := eventer.NewEventReceiver(logger, streamingClient, dictionary)
+	writer := writer.NewWriter(logger, dictionary)
 
-	scope.subscribeOrderbook(streamingClient)
-	scope.subscribeCandles(streamingClient)
-	defer scope.unsubscribeOrderbook(streamingClient)
-	defer scope.unsubscribeCandles(streamingClient)
+	for _, ticker := range config.GetOrderbookTickers() {
+		channel := receiver.SubscribeToOrderbook(ticker, config.OrderbookDepth)
+		figi, err := dictionary.GetFIGIByTicker(ticker)
+		if err != nil {
+			logger.Fatalln("subscribe ticker:", err)
+		}
+		logger.Println("Subscribed to orderbook", ticker, figi)
+		path := config.BuildOrderbookPath(ticker)
+		go writer.OrderbookWriter(channel, path)
+	}
+
+	for _, ticker := range config.GetCandleTickers() {
+		channel := receiver.SubscribeToCandle(ticker, config.CandleInterval)
+		figi, err := dictionary.GetFIGIByTicker(ticker)
+		if err != nil {
+			logger.Fatalln("subscribe candle:", err)
+		}
+		logger.Println("Subscribed to candles", ticker, figi)
+		path := config.BuildCandlePath(ticker)
+		go writer.CandleWriter(channel, path)
+	}
+
+	go receiver.Start()
 
 	select {} // sleep(0), epta
 }

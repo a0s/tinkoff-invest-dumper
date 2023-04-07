@@ -1,3 +1,5 @@
+> abandoned repository, code is not working
+
 Streaming Data Saver
 ====================
 [![GitHub release](https://img.shields.io/github/release/a0s/tinkoff-invest-dumper.svg)](https://github.com/a0s/tinkoff-invest-dumper/releases/latest)
